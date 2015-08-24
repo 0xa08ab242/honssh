@@ -1,0 +1,57 @@
+2015-08-23 18:08:40-0700 [-] Log opened.
+2015-08-23 18:08:40-0700 [-] twistd 13.2.0 (/usr/bin/python 2.7.6) starting up.
+2015-08-23 18:08:40-0700 [-] reactor class: twisted.internet.epollreactor.EPollReactor.
+2015-08-23 18:08:40-0700 [-] HonsshServerFactory starting on 2222
+2015-08-23 18:08:40-0700 [-] Starting factory <honssh.server.HonsshServerFactory instance at 0x7fc41bea5248>
+2015-08-23 18:08:43-0700 [Uninitialized] [ERR][FATAL] HonSSH could not connect to the honeypot to accquire the SSH Version String.
+2015-08-23 18:08:43-0700 [Uninitialized] [ERR][FATAL] Please ensure connectivity between HonSSH's client_addr to honey_addr:honey_port
+2015-08-23 18:08:43-0700 [Uninitialized] [ERR][FATAL] ...Gracefully Exiting
+2015-08-23 18:08:43-0700 [Uninitialized] Stopping factory <honssh.client.HonsshSlimClientFactory instance at 0x7fc41bea53f8>
+2015-08-23 18:08:43-0700 [-] (TCP Port 2222 Closed)
+2015-08-23 18:08:43-0700 [-] Stopping factory <honssh.server.HonsshServerFactory instance at 0x7fc41bea5248>
+2015-08-23 18:08:43-0700 [-] Main loop terminated.
+2015-08-23 18:08:43-0700 [-] Server Shut Down.
+2015-08-23 18:12:39-0700 [-] Log opened.
+2015-08-23 18:12:39-0700 [-] twistd 13.2.0 (/usr/bin/python 2.7.6) starting up.
+2015-08-23 18:12:39-0700 [-] reactor class: twisted.internet.epollreactor.EPollReactor.
+2015-08-23 18:12:39-0700 [-] HonsshServerFactory starting on 2222
+2015-08-23 18:12:39-0700 [-] Starting factory <honssh.server.HonsshServerFactory instance at 0x7f741f03e680>
+2015-08-23 18:12:39-0700 [HonsshSlimClientTransport,client] [CLIENT] Got SSH Version String: SSH-2.0-OpenSSH_6.0p1 Debian-4+deb7u2
+2015-08-23 18:12:39-0700 [HonsshSlimClientTransport,client] Disconnecting with error, code 10
+	reason: user closed connection
+2015-08-23 18:12:39-0700 [HonsshSlimClientTransport,client] connection lost
+2015-08-23 18:12:39-0700 [HonsshSlimClientTransport,client] [HONSSH] HonSSH Boot Sequence Complete - Ready for attacks!
+2015-08-23 18:12:39-0700 [HonsshSlimClientTransport,client] Stopping factory <honssh.client.HonsshSlimClientFactory instance at 0x7f741f03ec20>
+2015-08-23 18:14:05-0700 [-] [SERVER] Connecting to Honeypot: honeybadger (192.168.101.75:22)
+2015-08-23 18:14:05-0700 [-] [ADV-NET] - Advanced Networking disabled - Using client_addr
+2015-08-23 18:14:05-0700 [-] Starting factory <honssh.client.HonsshClientFactory instance at 0x7f741eff2cb0>
+2015-08-23 18:14:05-0700 [HonsshServerTransport,0,192.168.101.129] kex alg, key alg: diffie-hellman-group1-sha1 ssh-rsa
+2015-08-23 18:14:05-0700 [HonsshServerTransport,0,192.168.101.129] outgoing: aes256-ctr hmac-sha1 none
+2015-08-23 18:14:05-0700 [HonsshServerTransport,0,192.168.101.129] incoming: aes256-ctr hmac-sha1 none
+2015-08-23 18:14:05-0700 [Uninitialized] [CLIENT] - New client connection
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] kex alg, key alg: diffie-hellman-group-exchange-sha1 ssh-rsa
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] outgoing: aes256-ctr hmac-sha1 none
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] incoming: aes256-ctr hmac-sha1 none
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] REVERSE
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] NEW KEYS
+2015-08-23 18:14:05-0700 [HonsshClientTransport,client] [CLIENT] Client Connection Secured
+2015-08-23 18:14:05-0700 [-] [SERVER] CLIENT CONNECTED, REPLAYING BUFFERED PACKETS
+2015-08-23 18:14:06-0700 [HonsshServerTransport,0,192.168.101.129] NEW KEYS
+2015-08-23 18:14:10-0700 [HonsshClientTransport,client] [SSH] - Detected Public Key Auth - Disabling!
+2015-08-23 18:14:16-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: who
+2015-08-23 18:14:18-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: whoami
+2015-08-23 18:14:19-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: pwd
+2015-08-23 18:15:14-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: top
+2015-08-23 18:15:18-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: qapt-get update
+2015-08-23 18:15:21-0700 [HonsshServerTransport,0,192.168.101.129] [SSH] - Unknown Channel Request Type Detected - winadj@putty.projects.tartarus.org
+2015-08-23 18:15:29-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: grade
+2015-08-23 18:15:31-0700 [HonsshServerTransport,0,192.168.101.129] [SERVER] - Entered command: exit
+2015-08-23 18:15:31-0700 [HonsshServerTransport,0,192.168.101.129] Disconnecting with error, code 10
+	reason: user closed connection
+2015-08-23 18:15:31-0700 [HonsshServerTransport,0,192.168.101.129] connection lost
+2015-08-23 18:15:31-0700 [HonsshServerTransport,0,192.168.101.129] [OUTPUT] Lost Connection with the attacker: 192.168.101.129
+2015-08-23 18:15:31-0700 [HonsshClientTransport,client] connection lost
+2015-08-23 18:15:31-0700 [HonsshClientTransport,client] [CLIENT] Lost connection with the Honeypot: honeybadger (192.168.101.75:22)
+2015-08-23 18:15:31-0700 [HonsshClientTransport,client] Disconnecting with error, code 10
+	reason: user closed connection
+2015-08-23 18:15:31-0700 [HonsshClientTransport,client] Stopping factory <honssh.client.HonsshClientFactory instance at 0x7f741eff2cb0>

@@ -1,0 +1,178 @@
+spun up an old vm
+	Virtual Guest	64-bit Ubuntu 14 LTS
+	VM Hypervisor	VMware Workstation v11
+	Virtual Host	Windows 7 (64-bit) host
+
+patched vm guest before doing anything else
+	apt-get update
+	apt-get upgrade
+	apt-get dist-upgrade
+
+install (or verify as installed) HonSSH's listed requirements
+	apt-get install python2.7
+	apt-get install python-twisted
+	apt-get install python-mysqldb
+	apt-get install python-geoip
+	apt-get install ssh		[yes, I really had to install that]
+
+looking for correct/best/recommended procedure for installing HonSSH (https://github.com/tnich/honssh/wiki)
+	nothing obvious listed
+	not in the available ubuntu packages
+	therefore need to download source to some arbitrary location...
+		source is on github
+		apt-get install git
+	advanced networking requires root permissions
+	therefore, lacking guidance to the contrary installing as root
+		downloading to /tmp
+		cd /tmp/
+		git clone https://github.com/tnich/honssh.git
+			(for fun I will try pulling from my fork in a subsequent test)
+			git clone https://github.com/0xa08ab242/honssh.git
+so now I have the code... what do I need to do to make it work (in a preliminary test scenario)
+	I have 3 other VM guests in the same VLAN
+		1 is a virtual firewall/router/gateway for access to the Internet
+		1 is a Windows 7 guest with putty for initiating the ssh sessions
+		1 is a kali linux guest with sshd enabled to serve as the ssh target
+for Test 1:
+	all VMs on the same subnet
+
+for Test 2:
+	I need to move the Kali linux guest to another VLAN (this will break the normal traffic routing... revisit this issue later)
+	I need to make sure the Ubuntu guest can communicate with the Kali guest on SSH
+	I need to make sure the Windows guest can communicate with the Ubuntu guest on SSH
+
+for Test 3:
+	I need to rearchitect data flows for the "protected server" to work normal except for SSH
+	perhaps - allow the 'advertised IP address' of the target server be accessible only on a secondary VLAN
+	let the Ubuntu VM and the Kali VM each have a secondary network interface which would allow SSH traffic
+	should the secondary VLAN be host connected (TBD)
+	how to keep the traffic sane to manage...
+	what might the Kali linux traffic flow look like:
+		Consider SSH like an out-of-band management network concept...
+		Kali to Internet - eth0 on VLAN1
+			except for SSH... requires eth1 on VLAN2
+		Kali outbound SSH - eth1 on VLAN2
+			force traffic through HonSSH
+		VLAN1 to Kali - everything except SSH
+		VLAN2 to Kali - SSH only (from HonSSH as the only other guest on that VLAN)
+
+	HonSSH effectively becomes a bi-directional proxy where SSH crosses the network boundary
+		forward and reverse proxy scenario
+
+	In the larger, scaling up scenario, this would enable the VLAN2 (separate mananagement network)
+		address the external user concern via HonSSH gateway
+		address the data leakage via SSH from inside using HonSSH gateway
+		address 
+
+HonSSH configuration steps
+	[referring to HonSSH wiki for the next few steps]
+<snip>
+	Config	
+	Edit honssh.cfg to your liking and start by running:
+
+	./honsshctrl.sh START
+</snip>
+
+	So, according to this, I merely need to figure out what I like...
+	...before I can decide what I like, first I need to find at least 2 ways to make it work...
+
+Keeping a log of my fumbling through it:
+	navigate into download directory (local repository) - 
+		cd /tmp/honssh/
+	looking at my configuration options and what I have running at the moment (Test 1 scenario above)
+	review the configuration files (honssh.cfg.default and users.cfg.default)
+
+	cp honssh.cfg.default honssh.cfg
+	vi honssh.cfg
+required fields only
+	add a sensor name
+		arbitrary name (i.e. 'honeybadger' to identify the Kali SSH target)
+
+	IP addresses to listen for incoming SSH connections
+		Ubunutu ETH0 IP (ETH0 is 192.168.101.131)
+
+	Port number to listen for incoming SSH connections
+		default option is 2222 (works for test 1, we will change this for subsequent tests)
+
+	IP addresses to send outgoing SSH connections
+		Ubuntu ETH0 IP (ETH1 is 192.168.101.131)
+		[if send/receive on same port fails, then proceed to test scenario 2]
+
+	IP addresses of the honeypot
+		Kali ETH0 IP (ETH0 is 192.168.101.75)
+
+	Port number of the honeypot (honeypot = Kali VM in my scenario)
+		default is 22 (would typically use 22)	
+
+	Optional settings - accepting defaults
+		items to note
+			X11 forwarding is disabled
+			Port forwarding (SSH tunnel) is disabled
+			log directory is "logs"
+			session directory is "sessions"
+
+		Advanced Networking
+		set to false by default (will change this to true in future tests)
+
+		Live Interactions is disabled by default (may want to test this later)
+
+		Password spoofing is disabled by default (may want to test this later)
+
+		Logging to Text is enabled
+		Option logging
+			to MySQL database is disabled (might look to change this to a mariadb, postgresqldb, or something else...long term goal)	
+			to SMTP is disabled
+			to HP Feeds is disabled
+		
+		File download of SCP and SFTP is disabled by default (will change this is later tests)
+		Remote download/upload of SCP SFTP is disabled by default (e.g. save to cloud)
+
+		API hooks are all optional and disabled
+
+Test 1 - Iteration 1
+	after making the above desribed changes to the configuration file	(honssh.cfg)
+	start the honssh process	/tmp/honssh/honsshctrl.sh START
+		left public and private key generation passphrases empty (just hit ENTER)
+	check that it appears to be running as expected
+		ps -ef | grep ssh		shows normal ssh running and shows twistd -y honssh.tac running
+		netstat -na | grep 22		shows 22 listening on all interfaces; shows 2222 listening on eth0 IP
+	switch to the 'outside' vm guest
+	generate an SSH connection to honssh eth0 on port 2222
+
+Test 1 - success...connection through to 'inside guest'
+	now a few commands to create some logs to review
+	bottom line is that it worked
+	the .txt logs were trivial to review, but the did not contain the juicy data
+	the .tty logs need something else to review (kippo reader ttylog.py)
+		what can I use to sift through that log... grab the prompt, grab commands, etc...
+		is the timeline included in the .tty log
+		need to crack it open...
+
+n00b mistake 1 - after fixing all those things and running it once, I forgot to check the VM guest setting
+	took a break, shut everything down and restarted
+	all honssh related files were deleted (/tmp remember)... need to fix that for the next time
+	luckily I documented the details of my choices, so recreating this won't be too bad
+
+	so, what would be a better recommended installation location
+	/var... why /var ?  because it defaults to writing logs to the local directory (e.g. /honssh/logs/. and /honssh/sessions/.)
+		later I will try changing the file path to be explicit rather than relative to see how well that works
+
+	I also want to extract the .tty files to find a better way to analyze then than manual playback
+		I also need a better target system (login as user, execute sudo and/or su)
+
+Test 1 - Iteration 2
+	exactly the same as Iteration 1, except I pulled the source from my fork of the project
+	note, first run of honsshcrtl.sh START generated keys, but a check of ps -ef | grep ssh
+		the process was not running
+	after the second run of honsshctrl.sh START the process was visible from ps -ef | grep ssh
+	also, upon connecting to the same server again - due to key generation, putty bitched about the new certificate
+		need to follow up on that one for scaling this...
+	
+	getting the logs off...
+	scp'd the logs to host that I had setup to be able to copy them to the VM host (this took a few steps)
+
+Test 1 - post mortem
+	examine the contents of both /honssh/logs and /honssh/sessions
+	add output logs to my fork of the honssh repository and add readme files to those folders
+
+

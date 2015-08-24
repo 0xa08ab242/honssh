@@ -1,0 +1,13 @@
+20150823_181412_235583 - [POT  ] honeybadger - 192.168.101.75:22
+20150823_181405_919790 - [SSH  ] Incoming Connection from 192.168.101.129:1047 - SSH-2.0-PuTTY_Release_0.65
+20150823_181412_235583 - [SSH  ] Login Successful: root:toor
+20150823_181412_247554 - [TERM256] Opened Channel
+20150823_181416_284257 - [TERM256] Command Executed: who
+20150823_181418_104250 - [TERM256] Command Executed: whoami
+20150823_181419_828139 - [TERM256] Command Executed: pwd
+20150823_181514_065474 - [TERM256] Command Executed: top
+20150823_181518_328033 - [TERM256] Command Executed: qapt-get update
+20150823_181529_499536 - [TERM256] Command Executed: grade
+20150823_181531_731956 - [TERM256] Command Executed: exit
+20150823_181531_734870 - [TERM256] Closed Channel
+20150823_181531_735838 - [SSH  ] Lost Connection with 192.168.101.129

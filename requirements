@@ -1,5 +1,7 @@
-python-2.7
-python-twisted
-python-mysqldb
-python-geoip
-wget
+python-2.7			[https://www.python.org/downloads/]
+python-twisted	[https://twistedmatrix.com/trac/] [https://github.com/twisted/twisted]
+python-mysqldb	[http://http.debian.net/debian/pool/main/p/python-mysqldb/python-mysqldb_1.2.3.orig.tar.gz]
+python-geoip		[http://http.debian.net/debian/pool/main/p/python-geoip/python-geoip_1.2.4.orig.tar.gz]
+wget					[http://www.gnu.org/software/wget/]
+
+
