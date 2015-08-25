@@ -32,37 +32,27 @@ so now I have the code... what do I need to do to make it work (in a preliminary
 	I have 3 other VM guests in the same VLAN
 		1 is a virtual firewall/router/gateway for access to the Internet
 		1 is a Windows 7 guest with putty for initiating the ssh sessions
-		1 is a kali linux guest with sshd enabled to serve as the ssh target
+		1 is a Kali linux guest with sshd enabled to serve as the ssh target
 for Test 1:
 	all VMs on the same subnet
+	copied off logs for both /honssh/logs and /honssh/sessions for easier study
 
 for Test 2:
-	I need to move the Kali linux guest to another VLAN (this will break the normal traffic routing... revisit this issue later)
-	I need to make sure the Ubuntu guest can communicate with the Kali guest on SSH
-	I need to make sure the Windows guest can communicate with the Ubuntu guest on SSH
-
+	I moved the target linux guest to another VLAN (vmnet2)
+	Used firewall/load balancer (vfw2) on the same net as the Ubuntu (HonSSH)
+	confirmed connectivity from VLAN1 - local to HonSSH (still using port 2222) through vfw2 to target (on port 22)
+	used except for logs to update /honssh/logs/readme.md
+	
 for Test 3:
-	I need to rearchitect data flows for the "protected server" to work normal except for SSH
-	perhaps - allow the 'advertised IP address' of the target server be accessible only on a secondary VLAN
-	let the Ubuntu VM and the Kali VM each have a secondary network interface which would allow SSH traffic
-	should the secondary VLAN be host connected (TBD)
-	how to keep the traffic sane to manage...
-	what might the Kali linux traffic flow look like:
-		Consider SSH like an out-of-band management network concept...
-		Kali to Internet - eth0 on VLAN1
-			except for SSH... requires eth1 on VLAN2
-		Kali outbound SSH - eth1 on VLAN2
-			force traffic through HonSSH
-		VLAN1 to Kali - everything except SSH
-		VLAN2 to Kali - SSH only (from HonSSH as the only other guest on that VLAN)
+	I need to change the rules for vfw1 to allow ssh from external and direct it to HonSSH (map external port 22 to 2222 on HonSSH)
+	this will preserve normal ssh on HonSSH server, for now
+	continue using load balancing function of vfw2 to keep HonSSH on a different network
+	I need to fix the rules for vfw2 to fix the network traffic that I broke in Test 2
+	this should approximate a one-way protection scenario that could (in theory) scale to useful levels
 
-	HonSSH effectively becomes a bi-directional proxy where SSH crosses the network boundary
-		forward and reverse proxy scenario
-
-	In the larger, scaling up scenario, this would enable the VLAN2 (separate mananagement network)
-		address the external user concern via HonSSH gateway
-		address the data leakage via SSH from inside using HonSSH gateway
-		address 
+for Test 4:	
+	Setup HonSSH effectively for both forward and reverse proxy scenario
+	plan how to scale it
 
 HonSSH configuration steps
 	[referring to HonSSH wiki for the next few steps]
@@ -130,7 +120,7 @@ required fields only
 		API hooks are all optional and disabled
 
 Test 1 - Iteration 1
-	after making the above desribed changes to the configuration file	(honssh.cfg)
+	after making the above described changes to the configuration file	(honssh.cfg)
 	start the honssh process	/tmp/honssh/honsshctrl.sh START
 		left public and private key generation passphrases empty (just hit ENTER)
 	check that it appears to be running as expected
@@ -145,7 +135,7 @@ Test 1 - success...connection through to 'inside guest'
 	the .txt logs were trivial to review, but the did not contain the juicy data
 	the .tty logs need something else to review (kippo reader ttylog.py)
 		what can I use to sift through that log... grab the prompt, grab commands, etc...
-		is the timeline included in the .tty log
+		is the time line included in the .tty log
 		need to crack it open...
 
 n00b mistake 1 - after fixing all those things and running it once, I forgot to check the VM guest setting
@@ -175,4 +165,29 @@ Test 1 - post mortem
 	examine the contents of both /honssh/logs and /honssh/sessions
 	add output logs to my fork of the honssh repository and add readme files to those folders
 
-
+Test 2 - moving the target SSH server at least one network hop away from the HonSSH proxy
+	cloned the existing virtual firewall vfw1, since it has a load balancing function
+	changed network interfaces of clone (vfw2)
+		WAN for vfw2 is LAN for vfw1 (vmnet1)
+		LAN for vfrw2 is now vmnet2
+	updated IP addresses to match the updated network connections
+		configured load balancer
+			added virtual IP address --> this IP address was used as the target in honssh.cfg
+			added one IP into the pool --> this IP was assigned to the target SSH server
+	moved target SSH server (changed the virtual nic to use vmnic2 instead of vmnic1)
+		updated network configuration (since I usually run Kali with a static IP)
+	connected to honssh server from vm host via putty to confirm basic network connectivity
+	updated honssh.cfg
+	started via honsshctrl.sh
+	reran honsshctrl.sh after ps -ef | grep ssh did not show honssh running after the first run (I think it only generates the keys)
+	
+	successfully connected to honssh on port 2222, and transparently redirected to kali on port 22
+		entered invalid credentials before entering the correct ones, just to see how it shows up in the logs
+		ran a few commands, observed that I broke some of the network connectivity on the kali guest
+		ended the proxied connection
+	
+	connected to Kali via a putty session directly, ran a db_nmap -A scan against the honssh (Ubuntu 14 TLS) server to see how it fingerprints
+		here are the relevant results
+			port 22		(Ubuntu native SSH)		db_nmap info		protocol 2.0
+			port 2222	(Honssh SSH)				db_nmap info		OpenSSH 6.0p1 Debian 4+deb7u2 protocol 2.0
+	
